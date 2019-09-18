@@ -6,6 +6,7 @@ from copy import deepcopy
 all_lockers = []
 
 def print_locker_list(lockers):
+	'''prints a locker list if it is valid'''
 	for n in range(len(lockers)):
 		for m in range(n):
 			if (n-m)%2 == 1 and lockers[n] == lockers[m]:
@@ -14,6 +15,7 @@ def print_locker_list(lockers):
 	all_lockers.append(deepcopy(lockers))
 
 def print_locker(lockers):
+	'''recursively loops through all locker combinations and prints them using print_locker_list'''
 	if len(lockers) == 10:
 		print_locker_list(lockers)
 		return
