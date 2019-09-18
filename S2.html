@@ -1,0 +1,136 @@
+<!-- Code in script.js -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>SMC-2</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+<script>
+// Uses p5.js to create triangles from question 2 of round 2 of the senior scottish maths challenge
+// By Archie Maclean
+
+const large_area = 14;
+const medium_area = 7;
+const small_area = 4;
+
+const pixel_scale = 0.015;
+
+let mouse_x,mouse_y,large_triangle_bottom_right,large_triangle_base,quad_right_point,quad_left_point;
+
+function setup() {
+	// Basic window things
+	createCanvas(windowWidth,windowHeight);
+	background(0)
+	strokeWeight(0);
+}
+
+function drawLargeTriangle() {
+	// draw large triangle with mouse location as top point
+	// start at the bottom of the screen, 100 pixels from left, calculate base and draw triangle
+
+	const bottom_left = [100,windowHeight];
+	const top = [mouse_x,mouse_y];
+	const height = (windowHeight-mouse_y)*pixel_scale;
+	const base_length = (large_area/(height*1/2))/pixel_scale;
+	const bottom_right = [base_length+100,windowHeight];
+	fill(255,0,0);
+	triangle(...bottom_left,...bottom_right,...top);
+	large_triangle_base = base_length;
+	large_triangle_bottom_right = bottom_right;
+}
+
+function drawMediumTriangle() {
+	// draw 2nd triangle, with points at bottom 100 pixels from left, mouse location, and other point to make up area
+
+	// calculates the length of the topmost side by the ratio of its side length to the side length of the large triangle based on their areas
+
+	const bottom_left = [100,windowHeight];
+	const top = [mouse_x,mouse_y];
+	
+	const large_triangle_right_side = [large_triangle_bottom_right[0]-top[0],large_triangle_bottom_right[1]-top[1]];
+	const this_right_side = [large_triangle_right_side[0]/2,large_triangle_right_side[1]/(large_area/medium_area)];
+	const top_left = [top[0]-this_right_side[0],top[1]-this_right_side[1]];
+	fill(0,255,0);
+	triangle(...bottom_left,...top,...top_left);
+	quad_left_point = top_left;
+}
+
+function drawSmallTriangle() {
+	// draws small triangle, similar to medium triangle except on other side of large triangle
+
+	const bottom_left = [100+large_triangle_base,windowHeight];
+	const top = [mouse_x,mouse_y];
+	
+	const large_triangle_left_side = [100-top[0],windowHeight-top[1]];
+	const this_left_side = [large_triangle_left_side[0]/3.5,large_triangle_left_side[1]/(large_area/small_area)];
+	const top_right = [top[0]-this_left_side[0],top[1]-this_left_side[1]];
+	fill(0,0,255);
+	triangle(...bottom_left,...top,...top_right);
+	quad_right_point = top_right;
+}
+
+function drawQuadrilateral() {
+	// draw quadrilateral based on outermost points of triangles
+	// calculates equations of the outermost side of the triangles, then solves to find highest point
+
+	const bottom = [mouse_x,mouse_y];
+	const m_left = (quad_left_point[1]-windowHeight)/(quad_left_point[0]-100);
+	const m_right = (quad_right_point[1]-windowHeight)/(quad_right_point[0]-(100+large_triangle_base));
+
+	const c_left = quad_left_point[1] - m_left * quad_left_point[0];
+	const c_right = quad_right_point[1] - m_right * quad_right_point[0];
+
+	/*
+	by reshuffling
+	y = m1x + c1, y = m2x + c2
+	we get
+	m1x-m2x = c2-c1
+	x = (c2-c1)/(m1-m2)
+	*/
+
+	const top_x = (c_left-c_right)/(m_right-m_left);
+	const top_y = m_left * top_x + c_left;
+
+	fill(255,255,0);
+	quad(...bottom,...quad_left_point,top_x,top_y,...quad_right_point);
+
+	calculateQuadArea([top_x,top_y],quad_left_point,quad_right_point,bottom);
+}
+
+function calculateQuadArea(a,b,c,d) {
+	// calculates quadrilateral area, by using triangle formula twice:
+	// (x1y2 + x2y3 + x3y1 – x1y3 – x2y1 – x3y2)/2
+
+	// convert to actual lengths
+	a = a.map(v => pixel_scale*v);
+	b = b.map(v => pixel_scale*v);
+	c = c.map(v => pixel_scale*v);
+	d = d.map(v => pixel_scale*v);
+
+
+	const area_1 = (a[0]*b[1]+b[0]*c[1]+c[0]*a[1] - a[0]*c[1] - b[0]*a[1] - c[0]*b[1])/2
+	const area_2 = (b[0]*c[1]+c[0]*d[1]+d[0]*b[1] - b[0]*d[1] - c[0]*b[1] - d[0]*c[1])/2
+	const total_area = Math.abs(area_1)+Math.abs(area_2);
+	console.log(total_area);
+	// area to 5 d.p. to stop tiny errors
+	document.querySelector('#area').innerHTML = `Area of yellow: ${Math.round(total_area*100000)/100000} units squared`;
+}
+
+function draw() {
+	// draw function, cycles continously (handled by p5.js)
+	background(0);
+	mouse_x = mouseX; mouse_y = mouseY;	// prevent mouse changing between calculations
+	drawLargeTriangle();
+	drawMediumTriangle();
+	drawSmallTriangle();
+	drawQuadrilateral();
+}
+</script>
+<div id="area"></div>
+  </body>
+</html>
