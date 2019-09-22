@@ -9,19 +9,21 @@
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
 <script>
-// Uses p5.js to create triangles from question 2 of round 2 of the senior scottish maths challenge
+	// Uses p5.js to create triangles from question 2 of round 2 of the senior scottish maths challenge
 // By Archie Maclean
 
+// declare constants - change these to look at other areas, e.t.c.
 const large_area = 14;
 const medium_area = 7;
 const small_area = 4;
 
 const pixel_scale = 0.015;
 
+// declare global variables
 let mouse_x,mouse_y,large_triangle_bottom_right,large_triangle_base,quad_right_point,quad_left_point;
 
 function setup() {
-	// Basic window things
+	// Basic window setup
 	createCanvas(windowWidth,windowHeight);
 	background(0)
 	strokeWeight(0);
@@ -31,30 +33,37 @@ function drawLargeTriangle() {
 	// draw large triangle with mouse location as top point
 	// start at the bottom of the screen, 100 pixels from left, calculate base and draw triangle
 
+	// find the points of the triangle - nothing too strange here
 	const bottom_left = [100,windowHeight];
 	const top = [mouse_x,mouse_y];
 	const height = (windowHeight-mouse_y)*pixel_scale;
 	const base_length = (large_area/(height*1/2))/pixel_scale;
 	const bottom_right = [base_length+100,windowHeight];
-	fill(255,0,0);
+	fill(255,0,0);	// red fill
 	triangle(...bottom_left,...bottom_right,...top);
+
+	// store these values in global variables as they are needed to draw the other triangles
 	large_triangle_base = base_length;
 	large_triangle_bottom_right = bottom_right;
 }
 
 function drawMediumTriangle() {
-	// draw 2nd triangle, with points at bottom 100 pixels from left, mouse location, and other point to make up area
+	// this function draws the 2nd triangle, with points at bottom 100 pixels from left, 
+	// mouse location, and other point calculated to make up area
 
 	// calculates the length of the topmost side by the ratio of its side length to the side length of the large triangle based on their areas
+	// i.e. because it is half the area, its topmost side will be half that of the large triangle as their heights are the same
 
 	const bottom_left = [100,windowHeight];
 	const top = [mouse_x,mouse_y];
 	
 	const large_triangle_right_side = [large_triangle_bottom_right[0]-top[0],large_triangle_bottom_right[1]-top[1]];
-	const this_right_side = [large_triangle_right_side[0]/2,large_triangle_right_side[1]/(large_area/medium_area)];
+	const this_right_side = [large_triangle_right_side[0]/(large_area/medium_area),large_triangle_right_side[1]/(large_area/medium_area)];
 	const top_left = [top[0]-this_right_side[0],top[1]-this_right_side[1]];
-	fill(0,255,0);
+	fill(0,255,0);	// green fill
 	triangle(...bottom_left,...top,...top_left);
+
+	// the top left point of this triangle is the left point of the quadrilateral, so store it
 	quad_left_point = top_left;
 }
 
@@ -65,21 +74,26 @@ function drawSmallTriangle() {
 	const top = [mouse_x,mouse_y];
 	
 	const large_triangle_left_side = [100-top[0],windowHeight-top[1]];
-	const this_left_side = [large_triangle_left_side[0]/3.5,large_triangle_left_side[1]/(large_area/small_area)];
+	const this_left_side = [large_triangle_left_side[0]/(large_area/small_area),large_triangle_left_side[1]/(large_area/small_area)];
 	const top_right = [top[0]-this_left_side[0],top[1]-this_left_side[1]];
 	fill(0,0,255);
 	triangle(...bottom_left,...top,...top_right);
+
+	// the top right point of this triangle is the right point of the quadrilateral, so store it
 	quad_right_point = top_right;
 }
 
 function drawQuadrilateral() {
-	// draw quadrilateral based on outermost points of triangles
+	// this function draws the quadrilateral based on outermost points of triangles
 	// calculates equations of the outermost side of the triangles, then solves to find highest point
 
 	const bottom = [mouse_x,mouse_y];
+
+	// calculate the gradients of the lines along the outside of the whole triangle
 	const m_left = (quad_left_point[1]-windowHeight)/(quad_left_point[0]-100);
 	const m_right = (quad_right_point[1]-windowHeight)/(quad_right_point[0]-(100+large_triangle_base));
 
+	// calculate the y-intercepts of those lines
 	const c_left = quad_left_point[1] - m_left * quad_left_point[0];
 	const c_right = quad_right_point[1] - m_right * quad_right_point[0];
 
@@ -91,17 +105,21 @@ function drawQuadrilateral() {
 	x = (c2-c1)/(m1-m2)
 	*/
 
+	// find the top point by solving the two equations we worked out
+	// (the two sides of the outer triangle)
 	const top_x = (c_left-c_right)/(m_right-m_left);
 	const top_y = m_left * top_x + c_left;
 
-	fill(255,255,0);
+	fill(255,255,0);	// yellow fill
+
+	// draw quadrilateral
 	quad(...bottom,...quad_left_point,top_x,top_y,...quad_right_point);
 
 	calculateQuadArea([top_x,top_y],quad_left_point,quad_right_point,bottom);
 }
 
 function calculateQuadArea(a,b,c,d) {
-	// calculates quadrilateral area, by using triangle formula twice:
+	// this function calculates quadrilateral area, by using triangle formula twice:
 	// (x1y2 + x2y3 + x3y1 – x1y3 – x2y1 – x3y2)/2
 
 	// convert to actual lengths
@@ -110,12 +128,17 @@ function calculateQuadArea(a,b,c,d) {
 	c = c.map(v => pixel_scale*v);
 	d = d.map(v => pixel_scale*v);
 
-
+	// calculate area of top and bottom triangles
 	const area_1 = (a[0]*b[1]+b[0]*c[1]+c[0]*a[1] - a[0]*c[1] - b[0]*a[1] - c[0]*b[1])/2
 	const area_2 = (b[0]*c[1]+c[0]*d[1]+d[0]*b[1] - b[0]*d[1] - c[0]*b[1] - d[0]*c[1])/2
+	/* 
+	total area is the area of both triangles summed 
+	needs to be the absolute area because if it points downwards 
+	then the area is negative, which we don't want
+	*/
 	const total_area = Math.abs(area_1)+Math.abs(area_2);
 	console.log(total_area);
-	// area to 5 d.p. to stop tiny errors
+	// write area to screen - area to 5 d.p. to stop tiny error margin
 	document.querySelector('#area').innerHTML = `Area of yellow: ${Math.round(total_area*100000)/100000} units squared`;
 }
 
@@ -123,6 +146,8 @@ function draw() {
 	// draw function, cycles continously (handled by p5.js)
 	background(0);
 	mouse_x = mouseX; mouse_y = mouseY;	// prevent mouse changing between calculations
+
+	// draw the shapes
 	drawLargeTriangle();
 	drawMediumTriangle();
 	drawSmallTriangle();
