@@ -26,6 +26,7 @@ def print_locker(lockers):
 
 print("All locker combinations:\n")
 print_locker([])
+print(f'Number of combinations: {len(all_lockers)}')
 print("\nDone\nAll combination types:\n")
 
 locker_maps = []
@@ -44,3 +45,4 @@ for lockers in all_lockers:
 
 locker_maps.sort()
 print('\n'.join(locker_maps))
+print(f'Number of combination types: {len(locker_maps)}')
