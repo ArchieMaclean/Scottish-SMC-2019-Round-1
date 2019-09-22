@@ -4,12 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>SMC-2</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+		<style>
+/* Very basic styling */
+* {
+	margin: 0;
+	padding: 0;
+}
+canvas {
+	display: block;
+	margin:auto;
+}
+div {
+	display: block;
+	position: fixed;
+	top: .5rem;
+	left: .5rem;
+	font-weight: bold;
+	color: white;
+	font-family: sans-serif,'sans-serif';
+}
+</style>
   </head>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
 <script>
-	// Uses p5.js to create triangles from question 2 of round 2 of the senior scottish maths challenge
+// Uses p5.js to create triangles from question 2 of round 2 of the senior scottish maths challenge
 // By Archie Maclean
 
 // declare constants - change these to look at other areas, e.t.c.
@@ -24,8 +43,7 @@ let mouse_x,mouse_y,large_triangle_bottom_right,large_triangle_base,quad_right_p
 
 function setup() {
 	// Basic window setup
-	createCanvas(windowWidth,windowHeight);
-	background(0)
+	createCanvas(windowWidth,windowHeight);	background(0)
 	strokeWeight(0);
 }
 
@@ -76,7 +94,7 @@ function drawSmallTriangle() {
 	const large_triangle_left_side = [100-top[0],windowHeight-top[1]];
 	const this_left_side = [large_triangle_left_side[0]/(large_area/small_area),large_triangle_left_side[1]/(large_area/small_area)];
 	const top_right = [top[0]-this_left_side[0],top[1]-this_left_side[1]];
-	fill(0,0,255);
+	fill(0,0,255);	// blue fill
 	triangle(...bottom_left,...top,...top_right);
 
 	// the top right point of this triangle is the right point of the quadrilateral, so store it
@@ -154,6 +172,6 @@ function draw() {
 	drawQuadrilateral();
 }
 </script>
-<div id="area"></div>
+	<div id="area"></div>
   </body>
 </html>
